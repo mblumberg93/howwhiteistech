@@ -1,7 +1,24 @@
+import React, { useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import testFilePath from './data/developer_survey_2020/survey_results_public.csv';
+import Papa from 'papaparse'
 
 function App() {
+  useEffect(() => {
+    parseCsvData(testFilePath);
+  });
+
+  const parseCsvData = (filePath) => {
+    Papa.parse(filePath, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        console.log(results);
+      }
+    });
+  }
+
   return (
     <div className="App">
       <header className="App-header">

@@ -13,6 +13,14 @@ export default class FileProcessor extends Component{
         let rawData = data.map(x => x.data)
         rawData = rawData.filter(x => x.Country === "United States")
         let ethnicities = this.extractData(rawData, "Ethnicity")
+        let ethnicities2 = this.extractData(rawData, "RaceEthnicity")
+        let ethnicities3 = this.extractData(rawData, "Race")
+        if (Object.keys(ethnicities).length === 0) {
+            ethnicities = ethnicities2
+        }
+        if (Object.keys(ethnicities).length === 0) {
+            ethnicities = ethnicities3
+        }
         let genders = this.extractData(rawData, "Gender")
         let json = { ethnicities: ethnicities, genders: genders }
         let blob = new Blob([JSON.stringify(json)], {type: 'application/json'});
@@ -24,7 +32,7 @@ export default class FileProcessor extends Component{
     }
 
     extractData = (rawData, dataKey) => {
-        let filtered = rawData.filter(x => x[dataKey] !== "NA")
+        let filtered = rawData.filter(x => !(["NA", "I don’t know", "I prefer not to say"].includes(x[dataKey])))
         let total = filtered.length
         let reducer = (result, response) => {
           if (!response[dataKey]) {
@@ -32,6 +40,13 @@ export default class FileProcessor extends Component{
           }
           let types = response[dataKey].split(";")
           types.forEach((type) => {
+            type = type.trim()
+            if (["Transgender", "Gender non-conforming", "Other", "Transgender"].includes(type)) {
+                type = "Non-binary, genderqueer, or gender non-conforming"
+            }
+            if (["NA", "I don’t know", "I prefer not to say"].includes(type)) {
+                return result
+            }
             result[type] = (result[type] || 0) + 1
           })
           return result

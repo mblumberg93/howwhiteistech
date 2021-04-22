@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import { CSVReader } from 'react-papaparse'
+import { } from '../dataProcessing'
+
 const buttonRef = React.createRef()
 
 export default class FileProcessor extends Component{
@@ -11,53 +13,15 @@ export default class FileProcessor extends Component{
       
     handleOnFileLoad = (data) => {
         let rawData = data.map(x => x.data)
-        rawData = rawData.filter(x => x.Country === "United States")
-        let ethnicities = this.extractData(rawData, "Ethnicity")
-        let ethnicities2 = this.extractData(rawData, "RaceEthnicity")
-        let ethnicities3 = this.extractData(rawData, "Race")
-        if (Object.keys(ethnicities).length === 0) {
-            ethnicities = ethnicities2
-        }
-        if (Object.keys(ethnicities).length === 0) {
-            ethnicities = ethnicities3
-        }
-        let genders = this.extractData(rawData, "Gender")
-        let json = { ethnicities: ethnicities, genders: genders }
-        let blob = new Blob([JSON.stringify(json)], {type: 'application/json'});
-        let csvURL = window.URL.createObjectURL(blob);
-        let tempLink = document.createElement('a');
-        tempLink.href = csvURL;
-        tempLink.setAttribute('download', '2020_data.json');
-        tempLink.click();
+        // CHANGE THIS TO USE DATAPROCESSING
+        //let blob = new Blob([JSON.stringify(json)], {type: 'application/json'});
+        //let csvURL = window.URL.createObjectURL(blob);
+        //let tempLink = document.createElement('a');
+        //tempLink.href = csvURL;
+        //tempLink.setAttribute('download', '2020_data.json');
+        //tempLink.click();
     }
 
-    extractData = (rawData, dataKey) => {
-        let filtered = rawData.filter(x => !(["NA", "I don’t know", "I prefer not to say"].includes(x[dataKey])))
-        let total = filtered.length
-        let reducer = (result, response) => {
-          if (!response[dataKey]) {
-            return result
-          }
-          let types = response[dataKey].split(";")
-          types.forEach((type) => {
-            type = type.trim()
-            if (["Transgender", "Gender non-conforming", "Other", "Transgender"].includes(type)) {
-                type = "Non-binary, genderqueer, or gender non-conforming"
-            }
-            if (["NA", "I don’t know", "I prefer not to say"].includes(type)) {
-                return result
-            }
-            result[type] = (result[type] || 0) + 1
-          })
-          return result
-        }
-        let extracted = filtered.reduce(reducer, {})
-        for (var key in extracted) {
-          extracted[key] = (extracted[key] / total).toFixed(2)
-        }
-        return extracted
-    }
-    
     handleOnError = (err, file, inputElem, reason) => {
         console.log(err)
     }

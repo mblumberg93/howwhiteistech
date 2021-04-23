@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Papa from 'papaparse'
 import './App.css';
-import FileProcessor from './components/FileProcessor'
-import { generateProcessedData, extractData } from './dataProcessing'
+import { generateProcessedData, exportFile } from './dataProcessing'
 import data2020 from './data/StackOverflowData/2020_survey_results_public.csv';
 import data2019 from './data/StackOverflowData/2019_survey_results_public.csv';
 import data2018 from './data/StackOverflowData/2018_survey_results_public.csv';
@@ -16,6 +15,10 @@ import { processedSurveyData } from './data/processedSurveyData'
 
 function App() {
   useEffect(() => {
+    buidData()
+  });
+
+  const buidData = () => {
     let dataSets = {
       '2020': data2020,
       '2019': data2019,
@@ -25,16 +28,18 @@ function App() {
       '2015': data2015,
       '2014': data2014
     }
-    let processedData = {}
+    let processedData = []
     for (let year in dataSets) {
-      extractYearlyData(year, dataSets[year]).then((rawData) => {
-        processedData[year] = generateProcessedData(rawData)
-        console.log(processedData)
+      extractYearlyData(dataSets[year]).then((rawData) => {
+        processedData.push(generateProcessedData(year, rawData))
+        if (processedData.length === Object.keys(dataSets).length) {
+          chartData(processedData)
+        }
       })
     }
-  });
+  }
 
-  const extractYearlyData = async (year, dataFile) => {
+  const extractYearlyData = async (dataFile) => {
     return new Promise(resolve => {
       Papa.parse(dataFile, {
         download: true,
@@ -46,9 +51,40 @@ function App() {
     })
   }
 
+  const chartData = (dataPoints) => {
+    let ethnicitiesDataPoints = []
+    let gendersDataPoints = []
+    dataPoints.forEach((dataPoint) => {
+      if (dataPoint.ethnicities) {
+        ethnicitiesDataPoints.push(dataPoint.ethnicities)
+      }
+      if (dataPoint.genders) {
+        gendersDataPoints.push(dataPoint.genders)
+      }
+    })
+    ethnicitiesDataPoints.sort(compareYears)
+    gendersDataPoints.sort(compareYears)
+    let chartData = { 
+      ethnicities: ethnicitiesDataPoints,
+      genders: gendersDataPoints
+    }
+    console.log(chartData)
+    //exportFile(chartData)
+  }
+
+  const compareYears = (a, b) => {
+    if ( a.year < b.year ){
+      return -1;
+    }
+    if ( a.year > b.year ){
+      return 1;
+    }
+    return 0;
+  }
+
   return (
     <div className="App">
-      <FileProcessor></FileProcessor>
+
     </div>
   );
 }

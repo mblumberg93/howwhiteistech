@@ -1,4 +1,4 @@
-import { CSVDownloader } from "react-papaparse"
+const IGNORE_RESPONSES = ["NA", "I don’t know", "I prefer not to say", "Prefer not to disclose", "Biracial", "Multiracial"]
 
 const TYPES_MAP = {
     "Transgender": "Non-binary, genderqueer, or gender non-conforming",
@@ -7,11 +7,17 @@ const TYPES_MAP = {
     "Prefer not to disclose": null,
     "NA": null, 
     "I don’t know": null, 
-    "I prefer not to say": null
+    "I prefer not to say": null,
+    "Biracial": null,
+    "Multiracial": null,
+    "Hispanic or Latino/a/x": "Hispanic or Latino/Latina",
+    "Indigenous (such as Native American, Pacific Islander, or Indigenous Australian)": "Native American, Pacific Islander, or Indigenous Australian",
+    "Southeast Asian": "South or Southeast Asian",
+    "South Asian": "South or Southeast Asian"
 }
 
 export const extractData = (rawData, dataKey) => {
-    let filtered = rawData.filter(x => !(["NA", "I don’t know", "I prefer not to say"].includes(x[dataKey])))
+    let filtered = rawData.filter(x => includeResponse(x[dataKey]))
     let total = filtered.length
     let reducer = (result, response) => {
       if (!response[dataKey]) {
@@ -20,7 +26,7 @@ export const extractData = (rawData, dataKey) => {
       let types = response[dataKey].split(";")
       types = mapTypes(types)
       types.forEach((type) => {
-        if (["NA", "I don’t know", "I prefer not to say", "Prefer not to disclose"].includes(type)) {
+        if (IGNORE_RESPONSES.includes(type)) {
             return result
         }
         result[type] = (result[type] || 0) + 1
@@ -49,7 +55,14 @@ const mapType = (type) => {
     return type
 }
 
-export const generateProcessedData = (data) => {
+const includeResponse = (response) => {
+    if (response) {
+        return !(IGNORE_RESPONSES.includes(response.trim()))
+    }
+    return false
+}
+
+export const generateProcessedData = (year, data) => {
     let rawData = data.filter(x => x.Country === "United States" || x.country == "United States" ||
                                    x["What Country do you live in?"] == "United States")
     let ethnicities = extractData(rawData, "Ethnicity")
@@ -70,5 +83,24 @@ export const generateProcessedData = (data) => {
     if (Object.keys(genders).length === 0) {
         genders = genders3
     }
+    if (Object.keys(ethnicities).length) {
+        ethnicities["year"] = year
+    } else {
+        ethnicities = null
+    }
+    if (Object.keys(genders).length) {
+        genders["year"] = year
+    } else {
+        genders = null
+    }
     return { ethnicities: ethnicities, genders: genders }
+}
+
+export const exportFile = (data) => {
+    let blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
+    let csvURL = window.URL.createObjectURL(blob);
+    let tempLink = document.createElement('a');
+    tempLink.href = csvURL;
+    tempLink.setAttribute('download', 'data.json');
+    tempLink.click();
 }

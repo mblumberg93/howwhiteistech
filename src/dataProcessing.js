@@ -1,3 +1,6 @@
+import Papa from 'papaparse'
+import { DATA_SETS } from './data/dataSets'
+
 const IGNORE_RESPONSES = ["NA", "I don’t know", "I prefer not to say", "Prefer not to disclose", "Biracial", "Multiracial"]
 
 const TYPES_MAP = {
@@ -62,9 +65,9 @@ const includeResponse = (response) => {
     return false
 }
 
-export const generateProcessedData = (year, data) => {
-    let rawData = data.filter(x => x.Country === "United States" || x.country == "United States" ||
-                                   x["What Country do you live in?"] == "United States")
+const generateProcessedData = (year, data) => {
+    let rawData = data.filter(x => x.Country === "United States" || x.country === "United States" ||
+                                   x["What Country do you live in?"] === "United States")
     let ethnicities = extractData(rawData, "Ethnicity")
     let ethnicities2 = extractData(rawData, "RaceEthnicity")
     let ethnicities3 = extractData(rawData, "Race")
@@ -96,11 +99,66 @@ export const generateProcessedData = (year, data) => {
     return { ethnicities: ethnicities, genders: genders }
 }
 
-export const exportFile = (data) => {
+const exportFile = (data) => {
     let blob = new Blob([JSON.stringify(data)], {type: 'application/json'});
     let csvURL = window.URL.createObjectURL(blob);
     let tempLink = document.createElement('a');
     tempLink.href = csvURL;
     tempLink.setAttribute('download', 'data.json');
     tempLink.click();
+}
+
+export const buildData = () => {
+    let processedData = []
+    for (let year in DATA_SETS) {
+      extractYearlyData(DATA_SETS[year]).then((rawData) => {
+        processedData.push(generateProcessedData(year, rawData))
+        if (processedData.length === Object.keys(DATA_SETS).length) {
+          chartData(processedData)
+        }
+      })
+    }
+}
+
+const extractYearlyData = async (dataFile) => {
+    return new Promise(resolve => {
+      Papa.parse(dataFile, {
+        download: true,
+        header: true,
+        complete: function(results) {
+          resolve(results.data)
+        }
+      });
+    })
+}
+
+const chartData = (dataPoints) => {
+    let ethnicitiesDataPoints = []
+    let gendersDataPoints = []
+    dataPoints.forEach((dataPoint) => {
+      if (dataPoint.ethnicities) {
+        ethnicitiesDataPoints.push(dataPoint.ethnicities)
+      }
+      if (dataPoint.genders) {
+        gendersDataPoints.push(dataPoint.genders)
+      }
+    })
+    ethnicitiesDataPoints.sort(compareYears)
+    gendersDataPoints.sort(compareYears)
+    let chartData = { 
+      ethnicities: ethnicitiesDataPoints,
+      genders: gendersDataPoints
+    }
+    return chartData
+    //exportFile(chartData)
+}
+
+const compareYears = (a, b) => {
+    if ( a.year < b.year ){
+      return -1;
+    }
+    if ( a.year > b.year ){
+      return 1;
+    }
+    return 0;
 }

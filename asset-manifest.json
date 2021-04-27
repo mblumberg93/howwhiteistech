@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/howwhiteistech/static/css/main.3c118b5e.chunk.css",
+    "main.js": "/howwhiteistech/static/js/main.11a6997c.chunk.js",
+    "main.js.map": "/howwhiteistech/static/js/main.11a6997c.chunk.js.map",
+    "runtime-main.js": "/howwhiteistech/static/js/runtime-main.500e89ea.js",
+    "runtime-main.js.map": "/howwhiteistech/static/js/runtime-main.500e89ea.js.map",
+    "static/js/2.df4890f2.chunk.js": "/howwhiteistech/static/js/2.df4890f2.chunk.js",
+    "static/js/2.df4890f2.chunk.js.map": "/howwhiteistech/static/js/2.df4890f2.chunk.js.map",
+    "static/js/3.a5c6499a.chunk.js": "/howwhiteistech/static/js/3.a5c6499a.chunk.js",
+    "static/js/3.a5c6499a.chunk.js.map": "/howwhiteistech/static/js/3.a5c6499a.chunk.js.map",
+    "index.html": "/howwhiteistech/index.html",
+    "static/css/main.3c118b5e.chunk.css.map": "/howwhiteistech/static/css/main.3c118b5e.chunk.css.map",
+    "static/js/2.df4890f2.chunk.js.LICENSE.txt": "/howwhiteistech/static/js/2.df4890f2.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.500e89ea.js",
+    "static/js/2.df4890f2.chunk.js",
+    "static/css/main.3c118b5e.chunk.css",
+    "static/js/main.11a6997c.chunk.js"
+  ]
+}

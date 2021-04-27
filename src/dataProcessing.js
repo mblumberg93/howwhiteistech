@@ -16,7 +16,9 @@ const TYPES_MAP = {
     "Hispanic or Latino/a/x": "Hispanic or Latino/Latina",
     "Indigenous (such as Native American, Pacific Islander, or Indigenous Australian)": "Native American, Pacific Islander, or Indigenous Australian",
     "Southeast Asian": "South or Southeast Asian",
-    "South Asian": "South or Southeast Asian"
+    "South Asian": "South or Southeast Asian",
+    "Man": "Male",
+    "Woman": "Female"
 }
 
 export const extractData = (rawData, dataKey) => {
@@ -38,7 +40,7 @@ export const extractData = (rawData, dataKey) => {
     }
     let extracted = filtered.reduce(reducer, {})
     for (var key in extracted) {
-      extracted[key] = (extracted[key] / total).toFixed(2)
+      extracted[key] = ((extracted[key] / total) * 100).toFixed(2)
     }
     return extracted
 }
@@ -150,7 +152,6 @@ const chartData = (dataPoints) => {
       genders: gendersDataPoints
     }
     return chartData
-    //exportFile(chartData)
 }
 
 const compareYears = (a, b) => {
